@@ -1,9 +1,9 @@
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
-COPY go.mod go.sum ./
+COPY conveyor-api/go.mod conveyor-api/go.sum ./
 RUN go mod download
-COPY . .
+COPY conveyor-api/ .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /api ./cmd/api
 
 RUN apk add --no-cache curl && \
@@ -20,7 +20,7 @@ COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
 COPY --from=builder /app/dashboard /dashboard
 COPY --from=builder /app/migrations /migrations
 
-COPY start.sh /start.sh
+COPY conveyor-api/start.sh /start.sh
 RUN chmod +x /start.sh
 
 EXPOSE 8080
