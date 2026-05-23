@@ -1,15 +1,4 @@
 #include <ESP32Servo.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h>
-
-// WiFi configuration
-const char* ssid = "iPhone";
-const char* wifiPassword = "Santi1234$";
-
-// API configuration
-const char* apiUrl = "https://conveyor-automation-production.up.railway.app/api/readings";
-const char* apiKey = "dev-key-123";
 
 #define SENSOR_GAS_PIN  34
 #define SENSOR_HUM_PIN  39
@@ -31,16 +20,13 @@ bool puertaAbierta = false;
 int pos_puerta_cerrada = 50;
 int pos_puerta_abierta = 0;
 
-unsigned long ultimoEnvioAPI = 0;
-const unsigned long intervaloAPI = 300;
-
 long medirDistancia() {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-  long duracion = pulseIn(ECHO_PIN, HIGH, 3000); // timeout 3ms (~50cm alcance)
+  long duracion = pulseIn(ECHO_PIN, HIGH, 30000); // timeout 30ms
   return duracion * 0.034 / 2;
 }
 
@@ -60,48 +46,6 @@ void setup() {
 
   Serial.println("Calentando sensor MQ-02...");
   delay(20000);
-
-  WiFi.begin(ssid, wifiPassword);
-  Serial.print("Conectando a WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi conectado");
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP());
-}
-
-void enviarLectura(int gas, int humedad, long dist, int objetos) {
-  if (WiFi.status() != WL_CONNECTED) return;
-
-  HTTPClient http;
-  http.begin(apiUrl);
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("X-API-Key", apiKey);
-
-  StaticJsonDocument<256> doc;
-  doc["gas_value"] = gas;
-  doc["humidity_value"] = humedad;
-  doc["distance_cm"] = (float)dist;
-  doc["object_count"] = objetos;
-  doc["belt_running"] = digitalRead(RELAY_PIN) == HIGH;
-  doc["fan_on"] = digitalRead(FAN_PIN) == HIGH;
-  doc["buzzer_on"] = digitalRead(BUZZER_PIN) == HIGH;
-  doc["door_angle"] = puertaAbierta ? pos_puerta_abierta : pos_puerta_cerrada;
-
-  String payload;
-  serializeJson(doc, payload);
-
-  int httpCode = http.POST(payload);
-  if (httpCode > 0) {
-    Serial.print("API POST /readings -> ");
-    Serial.println(httpCode);
-  } else {
-    Serial.print("API error: ");
-    Serial.println(http.errorToString(httpCode).c_str());
-  }
-  http.end();
 }
 
 void loop() {
@@ -157,11 +101,5 @@ void loop() {
     }
   }
 
-  unsigned long ahora = millis();
-  if (ahora - ultimoEnvioAPI >= intervaloAPI) {
-    ultimoEnvioAPI = ahora;
-    enviarLectura(valorGas, valorHumedad, distancia, contadorObjetos);
-  }
-
-  delay(5);
+  delay(100); // Más rápido para no perder objetos en la banda
 }
