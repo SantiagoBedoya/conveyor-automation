@@ -96,18 +96,18 @@ func (h *Handler) ListReadings(w http.ResponseWriter, r *http.Request) {
 func evaluateThresholds(req createReadingRequest) []createAlertRequest {
 	var alerts []createAlertRequest
 
-	if req.GasValue > 300 {
+	if req.GasValue > 500 {
 		alerts = append(alerts, createAlertRequest{
 			Type:         model.AlertGas,
 			TriggerValue: req.GasValue,
-			Threshold:    300,
+			Threshold:    500,
 		})
 	}
-	if req.HumidityValue > 2500 {
+	if req.HumidityValue < 3000 {
 		alerts = append(alerts, createAlertRequest{
 			Type:         model.AlertHumidity,
 			TriggerValue: req.HumidityValue,
-			Threshold:    2500,
+			Threshold:    3000,
 		})
 	}
 	return alerts
