@@ -127,15 +127,15 @@ function renderSensorCards() {
 
     const gasVal = $('gasValue');
     gasVal.textContent = latest.gas_value;
-    gasVal.style.color = latest.gas_value > 300 ? 'var(--danger)' : 'var(--text-primary)';
+    gasVal.style.color = latest.gas_value > 500 ? 'var(--danger)' : 'var(--text-primary)';
     const gasCard = gasVal.closest('.sensor-card');
-    gasCard.dataset.alert = latest.gas_value > 300;
+    gasCard.dataset.alert = latest.gas_value > 500;
 
     const humVal = $('humidityValue');
     humVal.textContent = latest.humidity_value;
-    humVal.style.color = latest.humidity_value > 2500 ? 'var(--danger)' : 'var(--text-primary)';
+    humVal.style.color = latest.humidity_value < 3000 ? 'var(--danger)' : 'var(--text-primary)';
     const humCard = humVal.closest('.sensor-card');
-    humCard.dataset.alert = latest.humidity_value > 2500;
+    humCard.dataset.alert = latest.humidity_value < 3000;
 
     $('distanceValue').textContent = latest.distance_cm.toFixed(1);
     $('objectCount').textContent = latest.object_count;
@@ -194,8 +194,8 @@ function updateTable() {
     tbody.innerHTML = state.readings.slice().reverse().slice(0, 50).map(r => `
         <tr>
             <td>${fmtDateTime(r.timestamp)}</td>
-            <td style="color:${r.gas_value > 300 ? 'var(--danger)' : 'inherit'}">${r.gas_value}</td>
-            <td style="color:${r.humidity_value > 2500 ? 'var(--danger)' : 'inherit'}">${r.humidity_value}</td>
+            <td style="color:${r.gas_value > 500 ? 'var(--danger)' : 'inherit'}">${r.gas_value}</td>
+            <td style="color:${r.humidity_value < 3000 ? 'var(--danger)' : 'inherit'}">${r.humidity_value}</td>
             <td>${r.distance_cm.toFixed(1)}</td>
             <td>${r.object_count}</td>
             <td><span class="tag ${r.belt_running ? 'tag-on' : 'tag-off'}">${r.belt_running ? 'Sí' : 'No'}</span></td>
