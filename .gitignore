@@ -19,3 +19,9 @@ build/
 # Compiled objects
 *.o
 *.d
+
+# Environment files
+.env
+
+# Go binaries
+conveyor-api/api

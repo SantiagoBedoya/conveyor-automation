@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conveyor Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>Conveyor Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <span class="connection-status" id="connStatus">
+                <span class="dot" id="connDot"></span>
+                <span id="connText">Conectando...</span>
+            </span>
+            <span class="separator">|</span>
+            <span id="lastUpdate"></span>
+        </div>
+    </header>
+
+    <main>
+        <section class="status-cards" id="statusCards">
+            <div class="card status-card" data-key="belt_running">
+                <div class="card-icon">⚙️</div>
+                <div class="card-body">
+                    <div class="card-label">Banda</div>
+                    <div class="card-value" id="beltValue">---</div>
+                </div>
+                <div class="card-indicator" id="beltIndicator"></div>
+            </div>
+            <div class="card status-card" data-key="fan_on">
+                <div class="card-icon">🌀</div>
+                <div class="card-body">
+                    <div class="card-label">Ventilador</div>
+                    <div class="card-value" id="fanValue">---</div>
+                </div>
+                <div class="card-indicator" id="fanIndicator"></div>
+            </div>
+            <div class="card status-card" data-key="buzzer_on">
+                <div class="card-icon">🔊</div>
+                <div class="card-body">
+                    <div class="card-label">Zumbador</div>
+                    <div class="card-value" id="buzzerValue">---</div>
+                </div>
+                <div class="card-indicator" id="buzzerIndicator"></div>
+            </div>
+            <div class="card status-card" data-key="door_angle">
+                <div class="card-icon">🚪</div>
+                <div class="card-body">
+                    <div class="card-label">Puerta</div>
+                    <div class="card-value" id="doorValue">---</div>
+                </div>
+                <div class="card-angle-container">
+                    <svg viewBox="0 0 100 100" class="angle-gauge">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#2a2a4a" stroke-width="8"/>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#00d4ff" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" id="doorArc" stroke-linecap="round"/>
+                        <line x1="50" y1="50" x2="50" y2="5" stroke="#00d4ff" stroke-width="3" id="doorNeedle" transform="rotate(0 50 50)"/>
+                        <circle cx="50" cy="50" r="4" fill="#00d4ff"/>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="sensor-cards" id="sensorCards">
+            <div class="card sensor-card" data-key="gas">
+                <div class="card-icon">💨</div>
+                <div class="card-body">
+                    <div class="card-label">Gas</div>
+                    <div class="card-value" id="gasValue">---</div>
+                    <div class="card-unit">ppm</div>
+                </div>
+                <div class="card-threshold" id="gasThreshold">Límite: 300</div>
+            </div>
+            <div class="card sensor-card" data-key="humidity">
+                <div class="card-icon">💧</div>
+                <div class="card-body">
+                    <div class="card-label">Humedad</div>
+                    <div class="card-value" id="humidityValue">---</div>
+                    <div class="card-unit">RH</div>
+                </div>
+                <div class="card-threshold" id="humidityThreshold">Límite: 2500</div>
+            </div>
+            <div class="card sensor-card" data-key="distance">
+                <div class="card-icon">📏</div>
+                <div class="card-body">
+                    <div class="card-label">Distancia</div>
+                    <div class="card-value" id="distanceValue">---</div>
+                    <div class="card-unit">cm</div>
+                </div>
+            </div>
+            <div class="card sensor-card" data-key="objects">
+                <div class="card-icon">📦</div>
+                <div class="card-body">
+                    <div class="card-label">Objetos</div>
+                    <div class="card-value" id="objectCount">---</div>
+                    <div class="card-unit">total</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="main-panels">
+            <div class="panel chart-panel">
+                <div class="panel-header">
+                    <h2>Historial de Sensores</h2>
+                    <div class="chart-controls">
+                        <label><input type="checkbox" data-series="gas" checked> Gas</label>
+                        <label><input type="checkbox" data-series="humidity" checked> Humedad</label>
+                        <label><input type="checkbox" data-series="distance"> Distancia</label>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="readingsChart"></canvas>
+                </div>
+            </div>
+            <div class="panel alerts-panel">
+                <div class="panel-header">
+                    <h2>Alertas Activas</h2>
+                    <span class="badge" id="alertsBadge">0</span>
+                </div>
+                <div id="alertsList">
+                    <div class="alert-empty">Sin alertas activas</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="readings-section">
+            <div class="panel-header">
+                <h2>Lecturas Recientes</h2>
+                <span class="reading-count" id="readingCount">0</span>
+            </div>
+            <div class="table-wrapper">
+                <table id="readingsTable">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Gas (ppm)</th>
+                            <th>Humedad (RH)</th>
+                            <th>Distancia (cm)</th>
+                            <th>Objetos</th>
+                            <th>Banda</th>
+                            <th>Ventilador</th>
+                            <th>Zumbador</th>
+                            <th>Puerta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="readingsBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

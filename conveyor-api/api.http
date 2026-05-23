@@ -1,0 +1,71 @@
+@baseURL = http://localhost:8080
+
+### Get system status
+GET {{baseURL}}/api/status
+
+### List readings
+GET {{baseURL}}/api/readings
+
+### List readings with pagination
+GET {{baseURL}}/api/readings?limit=10&offset=0
+
+### Create reading (normal)
+POST {{baseURL}}/api/readings
+Content-Type: application/json
+
+{
+  "gas_value": 50,
+  "humidity_value": 500,
+  "distance_cm": 120.5,
+  "object_count": 3,
+  "belt_running": true,
+  "fan_on": true,
+  "buzzer_on": false,
+  "door_angle": 90
+}
+
+### Create reading (triggers GAS alert — gas_value > 300)
+POST {{baseURL}}/api/readings
+Content-Type: application/json
+
+{
+  "gas_value": 450,
+  "humidity_value": 800,
+  "distance_cm": 95.0,
+  "object_count": 1,
+  "belt_running": true,
+  "fan_on": false,
+  "buzzer_on": true,
+  "door_angle": 45
+}
+
+### Create reading (triggers HUMIDITY alert — humidity_value > 2500)
+POST {{baseURL}}/api/readings
+Content-Type: application/json
+
+{
+  "gas_value": 30,
+  "humidity_value": 3000,
+  "distance_cm": 150.0,
+  "object_count": 0,
+  "belt_running": true,
+  "fan_on": true,
+  "buzzer_on": true,
+  "door_angle": 90
+}
+
+### Get reading by ID (replace with actual UUID)
+GET {{baseURL}}/api/readings/73f2e265-f4e1-42d7-90ba-ce394533a2f7
+
+### List alerts
+GET {{baseURL}}/api/alerts
+
+### List alerts with pagination
+GET {{baseURL}}/api/alerts?limit=10&offset=0
+
+### List active alerts
+GET {{baseURL}}/api/alerts/active
+
+### Resolve alert by ID (replace with actual UUID)
+POST {{baseURL}}/api/alerts/73f2e265-f4e1-42d7-90ba-ce394533a2f7/resolve
+
